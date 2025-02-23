@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 import os
 
-api_key = os.getenv("GOOGLE_API_KEY")
-
+load_dotenv()
+print("API Key:", os.getenv("GOOGLE_API_KEY"))  # Should show your key
 
 # Inject Header HTML
 def inject_header():

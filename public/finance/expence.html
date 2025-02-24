@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Calculation</title>
+    <link rel="stylesheet" href="expence.css">
+</head>
+<body>
+    <header>
+        <h1>🌾 Crop Expense Calculator 🌾</h1>
+    </header>
+
+    <div class="container">
+        <h2>Enter Expenses:</h2>
+        <div class="exp">
+            <div class="expense-item">
+                <label>Land Preparation Cost:</label>
+                <input type="number" id="landCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Seed Cost:</label>
+                <input type="number" id="seedCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Sowing Cost:</label>
+                <input type="number" id="sowingCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Watering Cost:</label>
+                <input type="number" id="wateringCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Fertilizer Cost:</label>
+                <input type="number" id="fertilizerCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Labour Cost:</label>
+                <input type="number" id="labourCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Harvesting Cost:</label>
+                <input type="number" id="harvestingCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Transportation Cost:</label>
+                <input type="number" id="transportCost" placeholder="Enter cost">
+            </div>
+            <div class="expense-item">
+                <label>Storage Cost:</label>
+                <input type="number" id="storageCost" placeholder="Enter cost">
+            </div>
+        </div>
+
+        <button onclick = "calculateExpense()">Calculate Total Expense</button>
+        
+        <h2 id="totalExpense"></h2>
+    </div>
+
+    <script tyep = "module" src="expence.js"></script>
+</body>
+</html>

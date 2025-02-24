@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Farm Manager - Crop Management</title>
+  <link rel="stylesheet" href="crop.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <span>🍃 Smart Farm Manager</span>
+        <img class="home" src="home.svg" alt="">
+      </div>
+      <div class="user-actions">
+        <span>Welcome, Dyaneshwar!</span>
+        <button>Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="crop-management-section">
+      <h1>Crop Management</h1>
+      <div class="cards-container">
+        <div class="card">
+          <h2>➕ Add New Crop</h2>
+          <p>Register a new crop to start managing its details.</p>
+          <button>Add Crop</button>
+        </div>
+        <div class="card">
+          <h2>🌾 Soybean</h2>
+          <p>Monitor and manage your soybean crops effectively.</p>
+          <button id = "soyabean">View Details</button>
+        </div>
+        <div class="card">
+          <h2>🌿 Cotton</h2>
+          <p>Keep track of your cotton crop's growth and health.</p>
+          <button id = "cotton">View Details</button>
+        </div>
+        <div class="card">
+          <h2>🌽 Jowar (Sorghum)</h2>
+          <p>Manage your jowar crops with comprehensive tools.</p>
+          <button id = "jowar">View Details</button>
+        </div>
+        <div class="card hidden">
+          <h2>🍚 Rice</h2>
+          <p>Oversee your rice cultivation efficiently.</p>
+          <button>View Details</button>
+        </div>
+        <div class="card hidden">
+          <h2>🌾 Wheat</h2>
+          <p>Track and manage your wheat production seamlessly.</p>
+          <button>View Details</button>
+        </div>
+      </div>
+      <button id="loadMore">Load More</button>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>© 2025 Smart Farm Manager. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+        <span>Created by Team AgniDev</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="crop.js"></script>
+</body>
+</html>

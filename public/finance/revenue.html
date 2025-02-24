@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Financial Records</title>
+    <link rel="stylesheet" href="revenue.css">
+</head>
+<body>
+    <h2>Farmer Financial Records</h2>
+    <form id="recordForm">
+        <label for="name">Farmer Name:</label>
+        <input type="text" id="name" required placeholder="Name"><br>
+        
+        <label for="location">Farm Location:</label>
+        <input type="text" id="location" required placeholder="Location"><br>
+        
+        <label for="income">Income (₹):</label>
+        <input type="number" id="income" required placeholder="Income"><br>
+        
+        <label for="expenses">Expenses (₹):</label>
+        <input type="number" id="expenses" required placeholder="Expenses"><br>
+        
+        <label for="loan">Loan Amount (₹):</label>
+        <input type="number" id="loan" placeholder="Loan"><br>
+        
+        <label for="insurance">Insurance (₹):</label>
+        <input type="number" id="insurance" placeholder="Insurance"><br>
+        
+        <button type="submit">Add Record</button>
+    </form>
+    
+    <h2>Profit Calculation</h2>
+    <p id="profitOutput"></p>
+    
+    <div class="dashboard" id="dashboard"></div>
+    
+    <script>
+        document.getElementById("recordForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let income = parseFloat(document.getElementById("income").value) || 0;
+            let expenses = parseFloat(document.getElementById("expenses").value) || 0;
+            let loan = parseFloat(document.getElementById("loan").value) || 0;
+            let insurance = parseFloat(document.getElementById("insurance").value) || 0;
+            
+            let profit = income - (expenses + loan + insurance);
+            
+            document.getElementById("profitOutput").textContent = "Estimated Profit: ₹" + profit;
+        });
+    </script>
+</body>
+</html>

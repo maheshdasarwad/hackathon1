@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Farm Manager</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body class="bg-white">
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Icon Components
+    const ChevronDown = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
+
+    const ChevronUp = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    );
+
+    const Calendar = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10m-10 4h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    );
+
+    const stageOffsets = {
+      watering: 1,
+      fertilizer: 20,
+      harvesting: 100
+    };
+
+    const CropTracker = () => {
+      const [expandedSection, setExpandedSection] = useState(null);
+      const [ploughDate, setPloughDate] = useState('');
+      const [sowingDate, setSowingDate] = useState('');
+      const [stageDates, setStageDates] = useState(null);
+      const [progress, setProgress] = useState({
+        sowing: 0,
+        watering: 0,
+        fertilizer: 0,
+        harvesting: 0
+      });
+
+      const taskDefinitions = {
+        sowing: [
+          { id: 'ploughDate', label: 'Set plough date', isDateInput: true },
+          { id: 'soilTest', label: 'Complete soil pH test (ideal range 6.0-6.8)' },
+          { id: 'seedTreatment', label: 'Apply seed treatment for pest protection' },
+          { id: 'rowSpacing', label: 'Check row spacing (30 inches between rows)' },
+          { id: 'seedDepth', label: 'Verify seed depth (1-1.5 inches)' }
+        ],
+        watering: [
+          { id: 'soilMoisture', label: 'Check soil moisture (maintain 70-80% field capacity)' },
+          { id: 'irrigationSchedule', label: 'Set up irrigation schedule (2-3 inches/week)' },
+          { id: 'drainageCheck', label: 'Inspect field drainage system' },
+          { id: 'waterQuality', label: 'Test irrigation water quality' }
+        ],
+        fertilizer: [
+          { id: 'npkApplication', label: 'Apply NPK (20-20-20 composition)' },
+          { id: 'micronutrients', label: 'Check for micronutrient deficiencies' },
+          { id: 'leafColor', label: 'Monitor leaf color for nitrogen status' },
+          { id: 'soilNutrients', label: 'Test soil nutrient levels' }
+        ],
+        harvesting: [
+          { id: 'podCheck', label: 'Check pod color (95% brown pods ready)' },
+          { id: 'moistureTest', label: 'Test grain moisture (ideal 13-15%)' },
+          { id: 'equipmentPrep', label: 'Prepare harvesting equipment' },
+          { id: 'cropMaturity', label: 'Verify crop maturity (R8 stage)' }
+        ],
+      };
+
+      const [tasks, setTasks] = useState(
+        Object.keys(taskDefinitions).reduce((acc, section) => {
+          acc[section] = taskDefinitions[section].reduce((taskAcc, task) => {
+            if (!task.isDateInput) {
+              taskAcc[task.id] = false;
+            }
+            return taskAcc;
+          }, {});
+          return acc;
+        }, {})
+      );
+
+      const calculateStageDates = (sowDate) => {
+        if (!sowDate) return null;
+        const baseDate = new Date(sowDate);
+        return {
+          sowingDate: baseDate,
+          wateringStart: new Date(baseDate.getTime() + stageOffsets.watering * 24 * 60 * 60 * 1000),
+          fertilizerStart: new Date(baseDate.getTime() + stageOffsets.fertilizer * 24 * 60 * 60 * 1000),
+          harvestStart: new Date(baseDate.getTime() + stageOffsets.harvesting * 24 * 60 * 60 * 1000)
+        };
+      };
+
+      const formatDate = (date) => {
+        if (!date) return '';
+        return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+
+      const getSectionSubtitle = (section) => {
+        if (!stageDates) {
+          return '';
+        }
+        switch (section) {
+          case 'sowing':
+            return stageDates.sowingDate ? `Sowing Date: ${formatDate(stageDates.sowingDate)}` : '';
+          case 'watering':
+            return stageDates.wateringStart ? `Start: ${formatDate(stageDates.wateringStart)}` : '';
+          case 'fertilizer':
+            return stageDates.fertilizerStart ? `Apply: ${formatDate(stageDates.fertilizerStart)}` : '';
+          case 'harvesting':
+            return stageDates.harvestStart ? `Expected: ${formatDate(stageDates.harvestStart)}` : '';
+          default:
+            return '';
+        }
+      };
+
+      const handlePloughDateChange = (e) => {
+        const date = e.target.value;
+        setPloughDate(date);
+        if (date) {
+          const computedSowingDate = new Date(new Date(date).setMonth(new Date(date).getMonth() + 1));
+          const computedSowingDateStr = computedSowingDate.toISOString().split('T')[0];
+          setSowingDate(computedSowingDateStr);
+          const newStageDates = calculateStageDates(computedSowingDateStr);
+          setStageDates(newStageDates);
+        } else {
+          setSowingDate('');
+          setStageDates(null);
+        }
+      };
+
+      const calculateSectionProgress = (section) => {
+        if (section === 'sowing') {
+          const total = taskDefinitions.sowing.length;
+          let completed = 0;
+          taskDefinitions.sowing.forEach(task => {
+            if (task.isDateInput) {
+              if (task.id === 'ploughDate' && ploughDate) completed++;
+            } else {
+              if (tasks.sowing[task.id]) completed++;
+            }
+          });
+          return total > 0 ? Math.round((completed / total) * 100) : 0;
+        } else {
+          const sectionTasks = tasks[section];
+          const totalTasks = Object.keys(sectionTasks).length;
+          const completedTasks = Object.values(sectionTasks).filter(Boolean).length;
+          return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        }
+      };
+
+      const getSectionColor = (progress) => {
+        if (progress === 100) return 'bg-green-500';
+        if (progress >= 75) return 'bg-green-400';
+        if (progress >= 50) return 'bg-green-300';
+        if (progress >= 25) return 'bg-green-200';
+        return 'bg-green-100';
+      };
+
+      const handleTaskToggle = (e, section, taskId) => {
+        e.stopPropagation();
+        setTasks(prev => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [taskId]: !prev[section][taskId]
+          }
+        }));
+      };
+
+      const toggleSection = (section) => {
+        setExpandedSection(expandedSection === section ? null : section);
+      };
+
+      useEffect(() => {
+        const newProgress = {};
+        Object.keys(taskDefinitions).forEach(section => {
+          newProgress[section] = calculateSectionProgress(section);
+        });
+        setProgress(newProgress);
+      }, [tasks, ploughDate]);
+
+      const renderTask = (sectionKey, task) => {
+        if (task.isDateInput && task.id === 'ploughDate') {
+          return (
+            <div key={task.id} className="flex items-center gap-4 p-2 hover:bg-gray-50 rounded transition-colors duration-200">
+              <div className="flex items-center gap-2">
+                <Calendar />
+                <span className="text-gray-700 font-medium">Select plough date:</span>
+              </div>
+              <input
+                type="date"
+                value={ploughDate}
+                onChange={handlePloughDateChange}
+                placeholder="Set plough date"
+                className="border rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              />
+            </div>
+          );
+        } else {
+          return (
+            <label
+              key={task.id}
+              className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                checked={tasks[sectionKey][task.id]}
+                onChange={(e) => handleTaskToggle(e, sectionKey, task.id)}
+                className="w-4 h-4 transition-all duration-200"
+              />
+              <span>{task.label}</span>
+            </label>
+          );
+        }
+      };
+
+      const renderSection = (sectionKey, title) => {
+        const currentProgress = progress[sectionKey];
+        const sectionColor = getSectionColor(currentProgress);
+
+        return (
+          <div className={`relative border-2 border-green-700 rounded-lg overflow-hidden min-h-48 mb-4 transition-all duration-500 ${currentProgress === 100 ? 'border-green-500 shadow-lg shadow-green-100' : ''}`}>
+            <button
+              onClick={() => toggleSection(sectionKey)}
+              className={`w-full p-4 text-left flex justify-between items-center relative z-20 ${currentProgress === 100 ? 'bg-green-50' : 'bg-white'}`}
+            >
+              <div className="flex flex-col">
+                <span className={`text-xl font-semibold ${currentProgress === 100 ? 'text-green-700' : ''}`}>
+                  {title}
+                  {currentProgress === 100 && (
+                    <span className="ml-2 text-green-600">✓</span>
+                  )}
+                </span>
+                <span className="text-sm text-gray-600">{getSectionSubtitle(sectionKey)}</span>
+              </div>
+              {expandedSection === sectionKey ? <ChevronUp /> : <ChevronDown />}
+            </button>
+
+            <div
+              className={`absolute bottom-0 left-0 w-full transition-all duration-1000 ease-in-out ${sectionColor}`}
+              style={{
+                height: `${currentProgress}%`,
+                opacity: 0.15,
+              }}
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-white/20 animate-pulse" />
+              <div className="absolute top-1 left-0 w-full h-1 bg-white/10 animate-pulse delay-150" />
+            </div>
+
+            {expandedSection === sectionKey && (
+              <div
+                className={`p-4 relative z-10 ${currentProgress === 100 ? 'bg-green-50/90' : 'bg-white/90'} transition-all duration-300`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="space-y-3">
+                  {taskDefinitions[sectionKey].map(task => (
+                    <div key={task.id}>
+                      {renderTask(sectionKey, task)}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${sectionColor} transition-all duration-500`}
+                      style={{ width: `${currentProgress}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">
+                    {currentProgress}%
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div className="min-h-screen bg-white">
+          <header className="bg-[#228b22] text-white py-4 mb-8">
+            <div className="max-w-98% mx-auto px-8 flex justify-between items-center">
+              <div className="text-2xl font-bold">🍃 Smart Farm Manager</div>
+              <div className="flex items-center gap-4">
+                <span>Welcome</span>
+                <button className="bg-white text-green-700 px-8 py-2 rounded-full font-bold border-2 border-green-700 hover:bg-gray-100 transition-colors duration-200">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-6xl mx-auto p-8">
+            <h1 className="text-3xl font-bold text-center mb-8"> 🌽Jowar Crop Management & Records</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderSection('sowing', 'Sowing')}
+              {renderSection('watering', 'Watering')}
+              {renderSection('fertilizer', 'Fertilizers')}
+              {renderSection('harvesting', 'Harvesting')}
+            </div>
+          </main>
+
+          <footer className="bg-[#228b22] text-white py-4 mb-8">
+            <div className="max-w-98% mx-auto px-8 flex justify-between items-center flex-wrap gap-4">
+              <p>© 2025 Smart Farm Manager. All rights reserved.</p>
+              <div className="flex gap-4 items-center">
+                <a href="#" className="text-white hover:underline">About</a>
+                <a href="#" className="text-white hover:underline">Contact</a>
+                <a href="#" className="text-white hover:underline">Privacy</a>
+                <span>Created by Team AgniDev</span>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<CropTracker />, document.getElementById('root'));
+  </script>
+
+  <script src="api.js"></script>
+</body>
+
+</html>
